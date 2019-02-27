@@ -4,13 +4,22 @@ loader::obj_file cube_o("../Res/teapot.obj", loader::obj_face_format::no_backsla
 
 int main()
 {
+	// Variables used in the mouse delta, used to 
+	// calculate the difference in mouse position from each frame.
 	double old_x = 0, old_y = 0;
 	double new_x, new_y;
+	// Mouse deltas
 	double dx, dy;
+	
+	// View deltas, unused currently, but they're usually used 
+	// in the rotation of the camera, 1st person style
 	double current_angle_x = 0;
 	double current_angle_y = 0;
+	
+	// Camera is located 1 away in the Z axis from the origin.
 	math::vec3 camera_position(0, 0, -1);
 	math::vec3 light_direction(0, 1, -1);
+	
 	// Normalizing the light
 	float light_mag = std::sqrtf(light_direction.x_ * light_direction.x_ + 
 		light_direction.y_ * light_direction.y_ + light_direction.z_ * light_direction.z_);
@@ -18,13 +27,21 @@ int main()
 	light_direction.y_ / light_mag;
 	light_direction.z_ / light_mag;
 
+	// Object, wrongly named cube here, 
 	math::mat4x4 cube_transform = math::mat4x4::translation_matrix({0.0, 0.0, -300.f});
+	// Translates the camera position accordingly
 	math::mat4x4 camera_transform = math::mat4x4::translation_matrix(camera_position);
+	
+	// Perspective matrix, check "3d_math.h" for its definition.
+	// Was taken off of opengl, transposed to fit my row-major matrices.
 	math::mat4x4 g_perspective_matrix = math::mat4x4::perspective_matrix(68.f, 4.f/3.f, 0.01f, 1000.f);
 	gl_impl::window g_window({640, 480, ""});
 
+	// Sets up the window, mainly creates the window and sets it
+	// as the current OpenGL context
 	g_window.setup_window();
 
+	// Placeholder vertices, used extensively w/in the drawing of the object
 	math::vec3 projected_1;
 	math::vec3 projected_2;	
 	math::vec3 projected_3;
@@ -58,7 +75,7 @@ int main()
 		*/
 
 		/*
-		REMEMBER TO MIGRATE TO DISPLAY LISTS OR SOMETHING
+		Migrate the drawing code to something more modern at some point
 		*/
 		
 
@@ -79,7 +96,7 @@ int main()
 
 
 			/*
-			Calculating normals, only done for some objects
+			Calculating normals
 			*/
 			line1.x_ = projected_2.x_ - projected_1.x_;
 			line1.y_ = projected_2.y_ - projected_1.y_;
@@ -122,13 +139,13 @@ int main()
 				projected_2 = math::vec_mat_multiply(projected_2, g_perspective_matrix);
 				projected_3 = math::vec_mat_multiply(projected_3, g_perspective_matrix);
 
-				//glBegin(GL_TRIANGLES);
-				//glColor3f(dp, dp, dp);
+				glBegin(GL_TRIANGLES);
+				glColor3f(dp, dp, dp);
 
-				//glVertex2f(projected_1.x_, projected_1.y_);
-				//glVertex2f(projected_2.x_, projected_2.y_);
-				//glVertex2f(projected_3.x_, projected_3.y_);
-				//glEnd();
+				glVertex2f(projected_1.x_, projected_1.y_);
+				glVertex2f(projected_2.x_, projected_2.y_);
+				glVertex2f(projected_3.x_, projected_3.y_);
+				glEnd();
 			}
 
 		}
@@ -137,7 +154,9 @@ int main()
 		old_x = new_x;
 		old_y = new_y;
 
+		// Flip display and drawing contexts
 		g_window.flip();
+		// Flush and check window events
 		g_window.poll_events();
 	}
 }
